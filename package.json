@@ -1,6 +1,10 @@
 {
   "name": "ednt",
   "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
   "author": "Philipp Geschke <electricdynamite.apps@gmail.com>",
   "description": "A modular Looking Glass software",
   "repository": {
@@ -23,7 +27,13 @@
     "commander": "2.2.x",
     "underscore": "1.6.X",
     "async": "0.7.x",
-    "express": "4.0.x"
+    "express": "~4.0.0",
+    "static-favicon": "~1.0.0",
+    "morgan": "~1.0.0",
+    "cookie-parser": "~1.0.1",
+    "body-parser": "~1.0.0",
+    "debug": "~0.7.4",
+    "jade": "~1.3.0"
   },
   "license": "AGPL",
   "engines": {
