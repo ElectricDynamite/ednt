@@ -1,0 +1,32 @@
+{
+  "name": "ednt",
+  "version": "0.0.1",
+  "author": "Philipp Geschke <electricdynamite.apps@gmail.com>",
+  "description": "A modular Looking Glass software",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ElectricDynamite/ednt.git"
+  },
+  "bugs": {
+    "url" : "http://github.com/ElectricDynamite/ednt/issues",
+    "email" : "electricdynamite.apps@gmail.com"
+  },
+  "keywords": [
+    "ednt",
+    "electricdynamite",
+    "looking glass",
+    "traceroute",
+    "bgp",
+    "ping"
+  ],
+  "dependencies": {
+    "commander": "2.2.x",
+    "underscore": "1.6.X",
+    "async": "0.7.x",
+    "express": "4.0.x"
+  },
+  "license": "AGPL",
+  "engines": {
+    "node": ">=0.8"
+  }
+}
