@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "nodemon ./app.js"
   },
   "author": "Philipp Geschke <electricdynamite.apps@gmail.com>",
   "description": "A modular Looking Glass software",
@@ -24,6 +24,7 @@
     "ping"
   ],
   "dependencies": {
+    "nconf": "0.6.x",
     "commander": "2.2.x",
     "underscore": "1.6.X",
     "async": "0.7.x",
