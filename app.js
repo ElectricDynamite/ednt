@@ -6,6 +6,7 @@ nconf.defaults({
   "listen": {
     "port": 80
   },
+  "plugins": [],
   "user": "ednt",
   "group": "ednt",
   "keeproot": false
@@ -20,7 +21,6 @@ var bodyParser = require('body-parser');
 
 var router = express.Router();
 var routes = require('./routes/index');
-var users = require('./routes/users');
 
 var app = express();
 
@@ -42,7 +42,7 @@ nconf.get('plugins').forEach(function(pluginName){
   app.mountpoints = app.mountpoints || [];
   try {
     var plugin = require(pluginName);
-  } catch (e) {
+  } catch (err) {
     console.log('Error: Plugin '+pluginName+' not installed. Try "npm install '+pluginName+'"');
     return;
   }
@@ -83,15 +83,18 @@ nconf.get('plugins').forEach(function(pluginName){
 
 
 app.use(function(req, res, next) {
-  var mountpoint = req.url.split('/')[1];
-  console.log("Detected request for plugin: "+app.mountpoints[mountpoint]);
-  req.plugin = app.plugins[app.mountpoints[mountpoint]];
+  var exp = req.url.split(/^(([^:\/?#]+):)?(\/\/([^\/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?/);
+  var mountpoint = exp[5].split("/")[1]
+  var plugin = app.mountpoints[mountpoint];
+  if(plugin != undefined) {
+    console.log("Detected request for plugin: "+plugin);
+    req.plugin = app.plugins[app.mountpoints[mountpoint]];
+  }
   next();
 });
 
 
 app.use(router);
-app.use('/users', users);
 
 /// catch 404 and forwarding to error handler
 app.use(function(req, res, next) {
@@ -140,10 +143,11 @@ var server = app.listen(app.get('port'), function() {
       process.setuid(nconf.get('user'));
       console.log('New User ID: ' + process.getuid() + ', New Group ID: ' + process.getgid());
     } catch (err) {
-      console.log('Error: Could not drop root privileges');
+      console.log('Error: Could not drop root privileges. Make sure user \
+'+nconf.get('user')+' and group '+nconf.get('group')+' exist.');
       process.exit(1);
     }
   }
-  console.log('Express server listening on port ' + server.address().port);
+  console.log('EDNT server listening on port ' + server.address().port);
 });
 
