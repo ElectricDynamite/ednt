@@ -1,0 +1,8 @@
+{
+  "keeproot": false,
+  "user": "www-data",
+  "group": "www-data",
+  "plugins": [
+    "ednt-plugin-ping"
+  ]
+}

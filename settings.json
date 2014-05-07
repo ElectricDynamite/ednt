@@ -1,9 +1,0 @@
-{
-  "keeproot": false,
-  "user": "phiges",
-  "group": "users",
-  "plugins": [
-    "ednt-plugin-ping",
-    "ednt-plugin-mtr"
-  ]
-}
