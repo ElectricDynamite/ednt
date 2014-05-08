@@ -1,3 +1,21 @@
+/*
+ * This file is part of Electric Dynamite Network Tools (ednt).
+ * ednt is copyright 2014 Philipp Geschke <pg@electricdynamite.de>
+ *
+ * ednt is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Foobar is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with ednt.  If not, see <http://www.gnu.org/licenses/>.
+ */
+ 
 nconf = require('nconf');
 nconf.argv()
   .env()
@@ -18,6 +36,7 @@ var favicon = require('static-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var _ = require('underscore');
 
 var router = express.Router();
 var routes = require('./routes/index');
@@ -56,6 +75,20 @@ nconf.get('plugins').forEach(function(pluginName){
         console.log('Plugin '+pluginName+' requires root privileges, but we don\'t have them. Aborting load.');
         return;
       }
+      /* If the mountpoint is already in use by another plugin, try to
+       * find another mountpoint by suffixing a number counting up */
+      var suffix = '';
+      var mountpoint = plugin.MOUNTPOINT;
+      while(app.mountpoints[mountpoint] !== undefined) {
+        suffix++;
+        mountpoint = plugin.MOUNTPOINT + suffix;
+      }
+      if(mountpoint !== plugin.MOUNTPOINT) {
+        console.log('Warning: Duplicate mountpoint detected while loading\
+ plugin "'+pluginName+'". Duplicate mountpoint: "'+plugin.MOUNTPOINT+'". \
+ First defined by plugin "'+app.mountpoints[plugin.MOUNTPOINT]+'". Mounting\
+ plugin "'+pluginName+'" on "/'+mountpoint+'/".');
+      }
       if(plugin.init()) {
         /* loop through routes provided by the plugin to extract them 
          * and their properties */
@@ -64,7 +97,7 @@ nconf.get('plugins').forEach(function(pluginName){
           console.dir(route);
           if(n === "/") n = n+"?";
           var mw = "router."+route.method.toLowerCase()+
-            "('/"+plugin.MOUNTPOINT+n+"', routes);"
+            "('/"+mountpoint+n+"', routes);"
           console.log('evaling: '+mw);
           eval(mw);
           for(var prop in route) {
@@ -73,7 +106,7 @@ nconf.get('plugins').forEach(function(pluginName){
         }
         console.log('Plugin '+pluginName+' successfully loaded');
         app.plugins[pluginName] = plugin;
-        app.mountpoints[plugin.MOUNTPOINT] = pluginName;
+        app.mountpoints[mountpoint] = pluginName;
       } else {
         console.log('Error: Plugin '+pluginName+' did not load successfully');
       }
@@ -83,6 +116,7 @@ nconf.get('plugins').forEach(function(pluginName){
 
 
 app.use(function(req, res, next) {
+  /* Try to determine the plugin by checking the URL mountpoint */
   var exp = req.url.split(/^(([^:\/?#]+):)?(\/\/([^\/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?/);
   var mountpoint = exp[5].split("/")[1]
   var plugin = app.mountpoints[mountpoint];
