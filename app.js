@@ -62,6 +62,7 @@ nconf.get('plugins').forEach(function(pluginName){
   try {
     var plugin = require(pluginName);
   } catch (err) {
+    console.dir(err);
     console.log('Error: Plugin '+pluginName+' not installed. Try "npm install '+pluginName+'"');
     return;
   }
@@ -70,9 +71,9 @@ nconf.get('plugins').forEach(function(pluginName){
       init() function');
     return;
   } else {
-      console.log("Trying to load plugin: "+pluginName);
+      console.log("Debug: Trying to load plugin: "+pluginName);
       if(plugin.SU_REQUIRED && !su_available) {
-        console.log('Plugin '+pluginName+' requires root privileges, but we don\'t have them. Aborting load.');
+        console.log('Warning: Plugin '+pluginName+' requires root privileges, but we don\'t have them. Aborting load.');
         return;
       }
       /* If the mountpoint is already in use by another plugin, try to
@@ -92,6 +93,7 @@ nconf.get('plugins').forEach(function(pluginName){
       if(plugin.init()) {
         /* loop through routes provided by the plugin to extract them 
          * and their properties */
+         console.dir(plugin.ROUTES);
         for(var n in plugin.ROUTES) {
           var route = plugin.ROUTES[n];
           console.dir(route);
@@ -164,6 +166,12 @@ app.use(function(err, req, res, next) {
 
 //module.exports = app;
 app.set('port', nconf.get('listen:port'));
+
+if(app.get('port') < 1024 && !su_available) {
+  console.log('Error: Can\'t bind to port '+app.get('port')+' without\
+ root rights. Exiting.');
+ process.exit(255);
+}
 
 var server = app.listen(app.get('port'), function() {
   /* 

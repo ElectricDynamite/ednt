@@ -24,10 +24,16 @@ var router = express.Router();
  * delegate requests
  */
 router.use(function(req, res) {
-  
-  req.plugin.newRequest(req,res, function(e, result) {
+  var result = '';
+  req.plugin.on('output', function(err, output) {
+    console.log('OUTPUT: '+output);
+    result = result + output;
+  });
+  req.plugin.on('end', function(err) {
+    console.log('END REQUEST');
     res.render('index', { title: 'Electric Dynamite Network Tools', result: result});
   });
+  req.plugin.newRequest(req);
 });
 
 
