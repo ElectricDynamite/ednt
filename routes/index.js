@@ -19,23 +19,24 @@
 var express = require('express');
 var router = express.Router();
 
+
 /*
  * Default route that will catch all installed plugins' routes and
  * delegate requests
  */
 router.use(function(req, res) {
   var result = '';
+  /// This still subscribes multiple times, which is BS. Todo Fix
   req.plugin.on('output', function(err, output) {
     console.log('OUTPUT: '+output);
-    result = result + output;
+    app.socket.emit('message', output);
   });
-  req.plugin.on('end', function(err) {
+  req.plugin.once('end', function(err) {
     console.log('END REQUEST');
-    res.render('index', { title: 'Electric Dynamite Network Tools', result: result});
   });
   req.plugin.newRequest(req);
+  res.render('index', { title: 'Electric Dynamite Network Tools', result: 'dummy'});
 });
-
 
 
 module.exports = router;

@@ -41,7 +41,7 @@ var _ = require('underscore');
 var router = express.Router();
 var routes = require('./routes/index');
 
-var app = express();
+app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -130,6 +130,12 @@ app.use(function(req, res, next) {
 });
 
 
+
+router.get('/', function(req, res, next) {
+  console.log('test');
+  res.render('index', { title: 'Electric Dynamite Network Tools', result: 'start page' });
+});
+
 app.use(router);
 
 /// catch 404 and forwarding to error handler
@@ -173,7 +179,7 @@ if(app.get('port') < 1024 && !su_available) {
  process.exit(255);
 }
 
-var server = app.listen(app.get('port'), function() {
+var io = require('socket.io').listen(app.listen(app.get('port'), function() {
   /* 
    * Try to drop root privileges, unless explicitly told not to
    */
@@ -190,6 +196,41 @@ var server = app.listen(app.get('port'), function() {
       process.exit(1);
     }
   }
-  console.log('EDNT server listening on port ' + server.address().port);
+  console.log('EDNT server listening on port ' + app.get('port'));
+}));
+
+io.sockets.on('connection', function (socket) {
+    socket.emit('message', { message: 'welcome to the chat' });
+    socket.on('newRequest', function (data) {
+        console.dir(data);
+        var pluginName = data.plugin
+        data.params = data.params || {};
+        if(pluginName === undefined || pluginName === '') var err = new Error('No plugin defined');
+        else if(app.plugins[pluginName] === undefined) var err = new Error('Plugin '+pluginName+' not installed');
+        console.dir(app.plugins);
+        // If an error occured checking submitted data, return the error and exit fn
+        if(err !== undefined) { 
+          console.dir(err);
+          socket.emit('error', err.toString());
+          return;
+        }
+        
+        outputHandler = function(err, data) {
+          if(err) { 
+            console.dir(err);
+            socket.emit('error', err.toString());
+            return;
+          }
+          console.log(data);
+          socket.emit('output', data);
+        }
+        // otherwise, continue and submit the request to the plugin
+        app.plugins[pluginName].on('output', outputHandler);
+        app.plugins[pluginName].once('end', function(err) {
+          app.plugins[pluginName].removeListener('output', outputHandler);
+          console.log('REQUEST END');
+        });
+        app.plugins[pluginName].newRequest(data.params);
+    });
 });
 
