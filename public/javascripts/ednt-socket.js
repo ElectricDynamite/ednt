@@ -12,7 +12,7 @@ $(document).ready(function() {
       $('#pluginInputForm').submit(function(e) {
         e.preventDefault();
         var rParams = {};
-        $('#pluginInputForm').children('input').each(function(index, element) {
+        $('#pluginInputForm').children('input[type=text]').each(function(index, element) {
           var js = 'rParams.'+$(this).attr('data-paramName')+' = "'+$(this).val()+'"';
           eval(js);
         });
@@ -21,6 +21,8 @@ $(document).ready(function() {
           'plugin': plugin,
           'params': rParams };
         socket.emit('newRequest', request);
+        var queryStr = '?plugin='+plugin+'&'+$.param(request.params);
+        History.pushState(request, 'Electric Dynamite Network Tools', queryStr);
         console.dir(e);
       });
   });
