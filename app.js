@@ -203,11 +203,10 @@ io.sockets.on('connection', function (socket) {
     socket.emit('message', { message: 'welcome to the chat' });
     socket.on('newRequest', function (data) {
         console.dir(data);
-        var pluginName = data.plugin
+        var pluginName = app.mountpoints[data.plugin];
         data.params = data.params || {};
         if(pluginName === undefined || pluginName === '') var err = new Error('No plugin defined');
         else if(app.plugins[pluginName] === undefined) var err = new Error('Plugin '+pluginName+' not installed');
-        console.dir(app.plugins);
         // If an error occured checking submitted data, return the error and exit fn
         if(err !== undefined) { 
           console.dir(err);
