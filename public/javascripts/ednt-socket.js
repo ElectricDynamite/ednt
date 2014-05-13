@@ -9,6 +9,20 @@ $(document).ready(function() {
   var result = document.getElementById('result');
   socket.on('output', function (data) {
       result.innerHTML = result.innerHTML + '<br>'+data;
+      $('#pluginInputForm').submit(function(e) {
+        e.preventDefault();
+        var rParams = {};
+        $('#pluginInputForm').children('input').each(function(index, element) {
+          var js = 'rParams.'+$(this).attr('data-paramName')+' = "'+$(this).val()+'"';
+          eval(js);
+        });
+        var plugin = getUrlParameter('plugin');
+        var request = { 
+          'plugin': plugin,
+          'params': rParams };
+        socket.emit('newRequest', request);
+        console.dir(e);
+      });
   });
     
 
