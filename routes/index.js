@@ -25,6 +25,8 @@ var router = express.Router();
  * delegate requests
  */
 router.use(function(req, res) {
+  console.log("TEST!!");
+  /*
   var result = '';
   /// This still subscribes multiple times, which is BS. Todo Fix
   req.plugin.on('output', function(err, output) {
@@ -34,8 +36,11 @@ router.use(function(req, res) {
   req.plugin.once('end', function(err) {
     console.log('END REQUEST');
   });
-  req.plugin.newRequest(req);
-  res.render('index', { title: 'Electric Dynamite Network Tools', result: 'dummy'});
+  req.plugin.newRequest(req);*/
+  console.log(typeof(req.plugin));
+  res.render('index', { 
+    title: 'Electric Dynamite Network Tools',
+    plugin: req.plugin.FRIENDLY_NAME });
 });
 
 

@@ -8,7 +8,7 @@ $(document).ready(function() {
   var socket = io.connect('http://localhost:80');
   var result = document.getElementById('result');
   socket.on('output', function (data) {
-      result.innerHTML = result.innerHTML + '<br>'+data;
+      pluginContainer.innerHTML = pluginContainer.innerHTML + '<br>'+data;
       $('#pluginInputForm').submit(function(e) {
         e.preventDefault();
         var rParams = {};

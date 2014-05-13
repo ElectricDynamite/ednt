@@ -121,20 +121,17 @@ app.use(function(req, res, next) {
   /* Try to determine the plugin by checking the URL mountpoint */
   var exp = req.url.split(/^(([^:\/?#]+):)?(\/\/([^\/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?/);
   var mountpoint = exp[5].split("/")[1]
-  var plugin = app.mountpoints[mountpoint];
+  var plugin = app.mountpoints[req.query['plugin']];
   if(plugin != undefined) {
     console.log("Detected request for plugin: "+plugin);
-    req.plugin = app.plugins[app.mountpoints[mountpoint]];
+    req.plugin = app.plugins[plugin];
   }
   next();
 });
 
 
 
-router.get('/', function(req, res, next) {
-  console.log('test');
-  res.render('index', { title: 'Electric Dynamite Network Tools', result: 'start page' });
-});
+router.get('/', routes);
 
 app.use(router);
 
@@ -200,9 +197,8 @@ var io = require('socket.io').listen(app.listen(app.get('port'), function() {
 }));
 
 io.sockets.on('connection', function (socket) {
-    socket.emit('message', { message: 'welcome to the chat' });
     socket.on('newRequest', function (data) {
-        console.dir(data);
+        //console.dir(data);
         var pluginName = app.mountpoints[data.plugin];
         data.params = data.params || {};
         if(pluginName === undefined || pluginName === '') var err = new Error('No plugin defined');
@@ -220,7 +216,7 @@ io.sockets.on('connection', function (socket) {
             socket.emit('error', err.toString());
             return;
           }
-          console.log(data);
+          //console.log(data);
           socket.emit('output', data);
         }
         // otherwise, continue and submit the request to the plugin
